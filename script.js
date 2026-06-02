@@ -82,3 +82,11 @@ todoField.addEventListener('keydown', function (event) {
         addTodo();
     }
 });
+
+function openChangelog() {
+    document.querySelector('.changelog-content').classList.add('is-open');
+}
+
+function closeChangelog() {
+    document.querySelector('.changelog-content').classList.remove('is-open');
+}
