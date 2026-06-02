@@ -1,0 +1,239 @@
+﻿:root {
+    color-scheme: light;
+    --bg-start: #eef7f1;
+    --bg-end: #f7fbff;
+    --surface: rgba(255, 255, 255, 0.88);
+    --surface-strong: #ffffff;
+    --text: #172033;
+    --muted: #6b7280;
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --accent: #10b981;
+    --danger: #ef4444;
+    --danger-dark: #dc2626;
+    --border: #d8e0ee;
+    --shadow: 0 24px 70px rgba(23, 32, 51, 0.16);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    display: grid;
+    place-content: start center;
+    gap: 18px;
+    padding: 72px 20px;
+    font-family: Inter, Arial, sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.28), transparent 34%),
+        linear-gradient(135deg, var(--bg-start), var(--bg-end));
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(37, 99, 235, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37, 99, 235, 0.06) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(to bottom, black, transparent 70%);
+}
+
+h1,
+#todoField,
+body > button,
+#todoList {
+    width: min(100%, 520px);
+}
+
+h1 {
+    margin: 0 0 6px;
+    font-size: clamp(2rem, 7vw, 3.5rem);
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-align: center;
+}
+
+h1::after {
+    content: "Organisiert. Klar. Erledigt.";
+    display: block;
+    margin-top: 14px;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 400;
+    color: var(--muted);
+}
+
+#todoField {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    font: inherit;
+    color: var(--text);
+    background: var(--surface);
+    box-shadow: 0 12px 32px rgba(23, 32, 51, 0.08);
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+#todoField:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14), 0 14px 36px rgba(23, 32, 51, 0.1);
+    transform: translateY(-1px);
+}
+
+#todoField::placeholder {
+    color: #8b95a7;
+}
+
+button {
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    color: white;
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease, background-color 160ms ease;
+}
+
+body > button {
+    min-height: 52px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    box-shadow: 0 16px 34px rgba(37, 99, 235, 0.28);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: saturate(1.08);
+}
+
+body > button:hover {
+    box-shadow: 0 20px 44px rgba(37, 99, 235, 0.32);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+#todoList {
+    margin: 12px 0 0;
+    padding: 14px;
+    list-style: none;
+    border: 1px solid rgba(216, 224, 238, 0.75);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+}
+
+#todoList:not(:has(li)) {
+    display: none;
+}
+
+#todoList li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    color: var(--text);
+    background: var(--surface-strong);
+    box-shadow: 0 8px 22px rgba(23, 32, 51, 0.07);
+    overflow-wrap: anywhere;
+}
+
+#todoList li + li {
+    margin-top: 10px;
+}
+
+#todoList input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    flex: 0 0 auto;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.todo-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.delete-btn {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 14px;
+    color: white;
+    background: var(--danger);
+    box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
+}
+
+.delete-btn:hover {
+    background: var(--danger-dark);
+    box-shadow: 0 12px 24px rgba(239, 68, 68, 0.26);
+}
+
+#todoList li:has(input[type="checkbox"]:checked) {
+    color: var(--muted);
+    background: #f5f8fb;
+}
+
+#todoList li:has(input[type="checkbox"]:checked) .todo-text {
+    text-decoration: line-through;
+}
+
+.version-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    padding: 8px 12px;
+    border: 1px solid rgba(216, 224, 238, 0.75);
+    border-radius: 8px;
+    color: var(--muted);
+    background: var(--surface);
+    box-shadow: 0 10px 28px rgba(23, 32, 51, 0.12);
+    backdrop-filter: blur(18px);
+}
+
+.version {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.3;
+}
+
+@media (max-width: 560px) {
+    body {
+        padding: 42px 16px;
+        place-content: start stretch;
+    }
+
+    h1,
+    #todoField,
+    body > button,
+    #todoList {
+        width: 100%;
+    }
+
+    #todoList li {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .delete-btn {
+        margin-left: 34px;
+    }
+
+}
+
