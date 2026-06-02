@@ -201,10 +201,10 @@ button:active {
     padding: 8px 12px;
     border: 1px solid rgba(216, 224, 238, 0.75);
     border-radius: 8px;
-    color: var(--muted);
-    background: var(--surface);
+    color: white;
     box-shadow: 0 10px 28px rgba(23, 32, 51, 0.12);
     backdrop-filter: blur(18px);
+    background: linear-gradient(135deg, var(--accent), var(--primary));
 }
 
 .version {
@@ -303,7 +303,7 @@ button:active {
 
 @media (max-width: 560px) {
     body {
-        padding: 42px 16px;
+        padding: 72px 16px 24px;
         place-content: start stretch;
     }
 
