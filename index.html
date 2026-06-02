@@ -13,8 +13,13 @@
     <input id="todoField" placeholder="Bitte Text eingeben">
     <button onclick="addTodo()">Speichern</button>
 
-    <ul id="todoList">
-    </ul>
+    <h2>Offen</h2>
+        <ul id="todoList">
+        </ul>
+
+    <h2>Erledigt</h2>
+        <ul id="completedList">
+        </ul>
 
     <div class="changelog">
         <button onclick="openChangelog()">Changelog</button>
@@ -22,32 +27,99 @@
 
     <div class="changelog-content">
         <h2>Changelog</h2>
-        <ul>
-            <li>
-                <strong>Version 0.5.0-beta:</strong> <br>
-                    Todos können <strong>hinzugefügt, gelöscht und abgehackt</strong> werden.
-            </li>
-            <li>
-                <strong>Version 0.6.0:</strong> <br>
-                    Todos könne mit der Enter-Taste hinzugefügt werden.
-            </li>
-            <li>
-                <strong>Version 0.7.0-beta:</strong> <br>
-                    Ein <strong>Version Indicator</strong> wurde hinzugefügt, der die aktuelle Version anzeigt.
-            </li>
-            <li>
-                <strong>Version 1.0.0:</strong> <br>
-                    Todos werden beim Neuladen der Seite im localStorage gespeichert <br>
-            </li>
-            <li>
-                <strong>Version 1.1.0:</strong> <br>
-                EIn Changlog wurde hinzugefügt, der die Änderungen der einzelnen Versionen anzeigt. <br>
-            </li>
-            <li>
-                <strong>Version 1.1.1:</strong> <br>
-                <strong>Bugfix:</strong> Layout-Fehler auf Mobilgeräten behoben. <br>
-            </li>
-        </ul>
+            <h3>Geplant</h3>
+            <ul>
+                <li>
+                    <strong>Version 1.2.0:</strong> <br>
+                    <strong>Neu:</strong> Unterteilung von To-dos in "Offen" und "Erledigt". <br>
+                                            Design-Updates im Changelog.<br>
+
+                    <strong>Geplant:</strong> Demnächst<br>
+                </li>
+                <li>
+                    <strong>Version 2.0.0:</strong> <br>
+                    <strong>Neu:</strong> Account-System um überall auf die To-dos zuzugreifen. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 2.1.0:</strong> <br>
+                    <strong>Neu:</strong> Profilanzeige und Verwaltung. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 2.2.0:</strong> <br>
+                    <strong>Neu:</strong> To-dos bearbeiten können. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 2.3.0:</strong> <br>
+                    <strong>Neu:</strong> Mehrere To-do-Listen erstellen können. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 2.4.0:</strong> <br>
+                    <strong>Neu:</strong> Suchleiste um To-dos schneller zu finden. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 2.5.0:</strong> <br>
+                    <strong>Neu:</strong> Datum und Uhrzeit für To-dos hinzufügen. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 2.6.0:</strong> <br>
+                    <strong>Neu:</strong> Filterung von To-dos nach Kategorien. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 2.7.0:</strong> <br>
+                    <strong>Neu:</strong> To-dos als wichtig markieren können und als wichtig filtern. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 2.8.0:</strong> <br>
+                    <strong>Neu:</strong> Name der To-do-Liste bearbeiten können und To-do-Listen löschen können. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 2.9.0:</strong> <br>
+                    <strong>Neu:</strong> To-dos per Drag & Drop sortieren können. <br>
+                    <strong>Geplant:</strong> Juli 2026 <br>
+                </li>
+                <li>
+                    <strong>Version 3.0.0:</strong> <br>
+                    <strong>Neu:</strong> Kalender <br>
+                    <strong>Geplant:</strong> September 2026 <br>
+                </li>
+            </ul>
+
+            <h3>Veröffentlicht</h3>
+            <ul>
+                <li>
+                    <strong>Version 0.5.0-beta:</strong> <br>
+                        Todos können <strong>hinzugefügt, gelöscht und abgehackt</strong> werden.
+                </li>
+                <li>
+                    <strong>Version 0.6.0-beta:</strong> <br>
+                        Todos könne mit der Enter-Taste hinzugefügt werden.
+                </li>
+                <li>
+                    <strong>Version 0.7.0-beta:</strong> <br>
+                        Ein <strong>Version Indicator</strong> wurde hinzugefügt, der die aktuelle Version anzeigt.
+                </li>
+                <li>
+                    <strong>Version 1.0.0:</strong> <br>
+                        Todos werden beim Neuladen der Seite im localStorage gespeichert <br>
+                </li>
+                <li>
+                    <strong>Version 1.1.0:</strong> <br>
+                    EIn Changlog wurde hinzugefügt, der die Änderungen der einzelnen Versionen anzeigt. <br>
+                </li>
+                <li>
+                    <strong>Version 1.1.1:</strong> <br>
+                    <strong>Bugfix:</strong> Layout-Fehler auf Mobilgeräten behoben. <br>
+                </li>
+            </ul>
         <button onclick="closeChangelog()">Close</button>
     </div>
 
