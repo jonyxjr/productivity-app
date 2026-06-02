@@ -28,31 +28,54 @@ function addTodo() {
     // Neues Objekt ins Arry einfügen
     todos.push({ text: todoText, done: false });
 
-    const todoItem = document.createElement('li');
-    const checkbox = document.createElement('input');
-    const text = document.createElement('span');
-    const deleteButton = document.createElement('button');
+    saveTodos(); // <- immer nach jeder Änderung speichern
+    renderTodos(); // <- HTML-Liste neu aufbauen 
 
-    checkbox.type = 'checkbox';
-    text.className = 'todo-text';
-    text.textContent = todoText;
-    deleteButton.className = 'delete-btn';
-    deleteButton.type = 'button';
-    deleteButton.textContent = 'Löschen';
-
-    deleteButton.addEventListener('click', function () {
-        const shouldDelete = confirm('Möchtest du dieses To-do wirklich löschen?');
-
-        if (shouldDelete) {
-            todoItem.remove();
-        }
-    });
-
-    todoItem.append(checkbox, text, deleteButton);
-    todoList.appendChild(todoItem);
     todoField.value = '';
     todoField.focus();
 }
+
+// Löscht die HTML-Liste und baut sie komplett neu aus dem todos-Array auf
+function renderTodos() {
+    todoList.innerHTML = ''; // Alle bestehenden Listenelemente entfernen
+
+    todos.forEach(function (todo, index) {
+        const todoItem = document.createElement('li');
+        const checkbox = document.createElement('input');
+        const text = document.createElement('span');
+        const deleteButton = document.createElement('button');
+
+        checkbox.type = 'checkbox';
+        checkbox.checked = todo.done; // gespeicherten Haken-Status wiederherstellen
+
+        text.className = 'todo-text';
+        text.textContent = todo.text;
+
+        //Checkbox: Status im Array sperichern wenn geklickt 
+        checkbox.addEventListener('change', function () {
+            todos[index].done = checkbox.checked;
+            saveTodos(); // <- Status sofort speichern
+        });
+
+        deleteButton.className = 'delete-btn';
+        deleteButton.type = 'button';
+        deleteButton.textContent = 'Löschen';
+
+        deleteButton.addEventListener('click', function() {
+            if (confirm('Möchtest du dieses To-do wirklich löschen?')) {
+                todos.splice(index, 1); // 1 Element an Position index entfernen
+                saveTodos();
+                renderTodos();
+            }
+        });
+
+        todoItem.append(checkbox, text, deleteButton);
+        todoList.appendChild(todoItem);
+    });
+}
+
+// Seite lädt  -> gespeicherte Todos sofort anzeigen
+renderTodos();
 
 todoField.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
