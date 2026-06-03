@@ -451,3 +451,112 @@ button:active {
     }
 
 }
+
+#completedList {
+    width: min(100%, 520px);
+    margin: 12px 0 0;
+    padding: 14px;
+    list-style: none;
+    border: 1px solid rgba(216, 224, 238, 0.75);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+}
+
+#completedList:not(:has(li)) {
+    display: none;
+}
+
+#completedList li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    color: var(--muted);
+    background: #f5f8fb;
+    box-shadow: 0 8px 22px rgba(23, 32, 51, 0.07);
+    overflow-wrap: anywhere;
+}
+
+#completedList li + li {
+    margin-top: 10px;
+}
+
+#completedList input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    flex: 0 0 auto;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+#completedList .todo-text {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-decoration: line-through;
+}
+
+@media (max-width: 560px) {
+    #completedList {
+        width: 100%;
+    }
+
+    #completedList li {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+/* Kategorie-Ueberschriften */
+body > h2 {
+    position: relative;
+    width: min(100%, 520px);
+    margin: 18px 0 0;
+    padding: 14px 18px 14px 46px;
+    border: 1px solid rgba(216, 224, 238, 0.78);
+    border-left: 4px solid var(--primary);
+    border-radius: 8px;
+    color: var(--text);
+    background: var(--surface);
+    box-shadow: 0 12px 32px rgba(23, 32, 51, 0.08);
+    backdrop-filter: blur(18px);
+    font-size: 1.08rem;
+    line-height: 1.25;
+    font-weight: 700;
+}
+
+body > h2::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 18px;
+    width: 12px;
+    height: 12px;
+    border: 3px solid rgba(255, 255, 255, 0.96);
+    border-radius: 999px;
+    background: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+    transform: translateY(-50%);
+}
+
+body > h2:nth-of-type(2) {
+    border-left-color: var(--accent);
+    color: var(--muted);
+}
+
+body > h2:nth-of-type(2)::before {
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+}
+
+@media (max-width: 560px) {
+    body > h2 {
+        width: 100%;
+    }
+}

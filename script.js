@@ -1,5 +1,6 @@
 ﻿const todoField = document.getElementById('todoField');
 const todoList = document.getElementById('todoList');
+const completedList = document.getElementById('completedList');
 
 // Beim Start: Todos aus dem Local Storage laden
 let todos = loadTodos();
@@ -38,6 +39,7 @@ function addTodo() {
 // Löscht die HTML-Liste und baut sie komplett neu aus dem todos-Array auf
 function renderTodos() {
     todoList.innerHTML = ''; // Alle bestehenden Listenelemente entfernen
+    completedList.innerHTML = ''; // Alle erledigten Listenelemente entfernen
 
     todos.forEach(function (todo, index) {
         const todoItem = document.createElement('li');
@@ -55,6 +57,7 @@ function renderTodos() {
         checkbox.addEventListener('change', function () {
             todos[index].done = checkbox.checked;
             saveTodos(); // <- Status sofort speichern
+            renderTodos(); // <- Todo in die passende Liste verschieben
         });
 
         deleteButton.className = 'delete-btn';
@@ -71,6 +74,9 @@ function renderTodos() {
 
         todoItem.append(checkbox, text, deleteButton);
         todoList.appendChild(todoItem);
+        if (todo.done) {
+            completedList.appendChild(todoItem);
+        }
     });
 }
 
