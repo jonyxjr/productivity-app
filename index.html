@@ -1,130 +1,183 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-do List</title>
-    <link rel="stylesheet" href="style.css">
+    <title>To-do Liste</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Meine To-do Liste</h1>
-    <input id="todoField" placeholder="Bitte Text eingeben">
-    <button onclick="addTodo()">Speichern</button>
+    <section class="auth-shell" id="authShell">
+        <div class="container" id="container">
+            <div class="form-container sign-up">
+                <form id="registerForm">
+                    <h1>Konto erstellen</h1>
+                    <span>Registriere dich mit E-Mail und Passwort</span>
+                    <input id="registerName" type="text" placeholder="Benutzername" autocomplete="username" required>
+                    <input id="registerEmail" type="email" placeholder="E-Mail" autocomplete="email" required>
+                    <input id="registerPassword" type="password" placeholder="Passwort" autocomplete="new-password" required>
+                    <button type="submit">Registrieren</button>
+                    <button class="guest-button" type="button">Ohne Konto nutzen</button>
+                    <p class="auth-message" aria-live="polite"></p>
+                </form>
+            </div>
 
-    <h2>Offen</h2>
-        <ul id="todoList">
-        </ul>
+            <div class="form-container sign-in">
+                <form id="loginForm">
+                    <h1>Anmelden</h1>
+                    <span>Melde dich mit deinem Konto an</span>
+                    <input id="loginEmail" type="email" placeholder="E-Mail" autocomplete="email" required>
+                    <input id="loginPassword" type="password" placeholder="Passwort" autocomplete="current-password" required>
+                    <button type="submit">Anmelden</button>
+                    <button class="guest-button" type="button">Ohne Konto nutzen</button>
+                    <p class="auth-message" aria-live="polite"></p>
+                </form>
+            </div>
 
-    <h2>Erledigt</h2>
-        <ul id="completedList">
-        </ul>
+            <div class="toggle-container">
+                <div class="toggle">
+                    <div class="toggle-panel toggle-left">
+                        <h1>Willkommen zurück!</h1>
+                        <p>Melde dich an und lade deine To-dos direkt aus der Cloud.</p>
+                        <button class="hidden" id="showLoginPanel" type="button">Anmelden</button>
+                    </div>
+                    <div class="toggle-panel toggle-right">
+                        <h1>Hallo!</h1>
+                        <p>Erstelle ein Konto und synchronisiere deine To-dos mit Firebase.</p>
+                        <button class="hidden" id="showRegisterPanel" type="button">Registrieren</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="changelog">
-        <button onclick="openChangelog()">Changelog</button>
-    </div>
+    <main class="app" id="app" hidden>
+        <div class="top-actions">
+            <p id="userStatus">Lokaler Modus</p>
+            <button id="btnLogout" type="button">Abmelden</button>
+        </div>
 
-    <div class="changelog-content">
-        <h2>Changelog</h2>
+        <h1>Meine To-do Liste</h1>
+
+        <div class="todo-input-row">
+            <input id="todoField" placeholder="Bitte To-do eingeben" autocomplete="off">
+            <button id="btn-add-todo" type="button">Speichern</button>
+        </div>
+
+        <h2>Offen</h2>
+        <ul id="todoList"></ul>
+
+        <h2>Erledigt</h2>
+        <ul id="completedList"></ul>
+
+        <div class="changelog">
+            <button onclick="openChangelog()" type="button">Änderungen</button>
+        </div>
+
+        <div class="changelog-content">
+            <h2>Änderungen</h2>
             <h3>Geplant</h3>
             <ul>
+                
                 <li>
-                    <strong>Version 2.0.0:</strong> <br>
-                    <strong>Neu:</strong> Account-System um überall auf die To-dos zuzugreifen. <br>
-                    <strong>Geplant:</strong> Juli 2026 <br>
+                    <strong>Version 2.1.0:</strong><br>
+                    <strong>Neu:</strong> Profilanzeige und Verwaltung.<br>
+                    <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
-                    <strong>Version 2.1.0:</strong> <br>
-                    <strong>Neu:</strong> Profilanzeige und Verwaltung. <br>
-                    <strong>Geplant:</strong> Juli 2026 <br>
+                    <strong>Version 2.2.0:</strong><br>
+                    <strong>Neu:</strong> To-dos bearbeiten können.<br>
+                    <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
-                    <strong>Version 2.2.0:</strong> <br>
-                    <strong>Neu:</strong> To-dos bearbeiten können. <br>
-                    <strong>Geplant:</strong> Juli 2026 <br>
+                    <strong>Version 2.3.0:</strong><br>
+                    <strong>Neu:</strong> Mehrere To-do-Listen erstellen können.<br>
+                    <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
-                    <strong>Version 2.3.0:</strong> <br>
-                    <strong>Neu:</strong> Mehrere To-do-Listen erstellen können. <br>
-                    <strong>Geplant:</strong> Juli 2026 <br>
+                    <strong>Version 2.4.0:</strong><br>
+                    <strong>Neu:</strong> Suchleiste, um To-dos schneller zu finden.<br>
+                    <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
-                    <strong>Version 2.4.0:</strong> <br>
-                    <strong>Neu:</strong> Suchleiste um To-dos schneller zu finden. <br>
-                    <strong>Geplant:</strong> Juli 2026 <br>
+                    <strong>Version 2.5.0:</strong><br>
+                    <strong>Neu:</strong> Datum und Uhrzeit für To-dos hinzufügen.<br>
+                    <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
-                    <strong>Version 2.5.0:</strong> <br>
-                    <strong>Neu:</strong> Datum und Uhrzeit für To-dos hinzufügen. <br>
-                    <strong>Geplant:</strong> Juli 2026 <br>
+                    <strong>Version 2.6.0:</strong><br>
+                    <strong>Neu:</strong> Filterung von To-dos nach Kategorien.<br>
+                    <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
-                    <strong>Version 2.6.0:</strong> <br>
-                    <strong>Neu:</strong> Filterung von To-dos nach Kategorien. <br>
-                    <strong>Geplant:</strong> Juli 2026 <br>
+                    <strong>Version 2.7.0:</strong><br>
+                    <strong>Neu:</strong> To-dos als wichtig markieren und filtern.<br>
+                    <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
-                    <strong>Version 2.7.0:</strong> <br>
-                    <strong>Neu:</strong> To-dos als wichtig markieren können und als wichtig filtern. <br>
-                    <strong>Geplant:</strong> Juli 2026 <br>
+                    <strong>Version 2.8.0:</strong><br>
+                    <strong>Neu:</strong> Name der To-do-Liste bearbeiten und To-do-Listen löschen.<br>
+                    <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
-                    <strong>Version 2.8.0:</strong> <br>
-                    <strong>Neu:</strong> Name der To-do-Liste bearbeiten können und To-do-Listen löschen können. <br>
-                    <strong>Geplant:</strong> Juli 2026 <br>
+                    <strong>Version 2.9.0:</strong><br>
+                    <strong>Neu:</strong> To-dos per Drag & Drop sortieren.<br>
+                    <strong>Geplant:</strong> August 2026
                 </li>
                 <li>
-                    <strong>Version 2.9.0:</strong> <br>
-                    <strong>Neu:</strong> To-dos per Drag & Drop sortieren können. <br>
-                    <strong>Geplant:</strong> August 2026 <br>
-                </li>
-                <li>
-                    <strong>Version 3.0.0:</strong> <br>
-                    <strong>Neu:</strong> Kalender <br>
-                    <strong>Geplant:</strong> September 2026 <br>
+                    <strong>Version 3.0.0:</strong><br>
+                    <strong>Neu:</strong> Kalender.<br>
+                    <strong>Geplant:</strong> September 2026
                 </li>
             </ul>
 
             <h3>Veröffentlicht</h3>
             <ul>
                 <li>
-                    <strong>Version 0.5.0-beta:</strong> <br>
-                        Todos können <strong>hinzugefügt, gelöscht und abgehackt</strong> werden.
+                    <strong>Version 0.5.0-beta:</strong><br>
+                    To-dos können <strong>hinzugefügt, gelöscht und abgehakt</strong> werden.
                 </li>
                 <li>
-                    <strong>Version 0.6.0-beta:</strong> <br>
-                        Todos könne mit der Enter-Taste hinzugefügt werden.
+                    <strong>Version 0.6.0-beta:</strong><br>
+                    To-dos können mit der Enter-Taste hinzugefügt werden.
                 </li>
                 <li>
-                    <strong>Version 0.7.0-beta:</strong> <br>
-                        Ein <strong>Version Indicator</strong> wurde hinzugefügt, der die aktuelle Version anzeigt.
+                    <strong>Version 0.7.0-beta:</strong><br>
+                    Ein <strong>Versionshinweis</strong> zeigt die aktuelle Version an.
                 </li>
                 <li>
-                    <strong>Version 1.0.0:</strong> <br>
-                        Todos werden beim Neuladen der Seite im localStorage gespeichert <br>
+                    <strong>Version 1.0.0:</strong><br>
+                    To-dos werden beim Neuladen der Seite im lokalen Speicher gespeichert.
                 </li>
                 <li>
-                    <strong>Version 1.1.0:</strong> <br>
-                    Ein Changlog wurde hinzugefügt, der die Änderungen der einzelnen Versionen anzeigt. <br>
+                    <strong>Version 1.1.0:</strong><br>
+                    Eine Änderungsübersicht zeigt die Änderungen der einzelnen Versionen an.
                 </li>
                 <li>
-                    <strong>Version 1.1.1:</strong> <br>
-                    <strong>Bugfix:</strong> Layout-Fehler auf Mobilgeräten behoben. <br>
+                    <strong>Version 1.1.1:</strong><br>
+                    <strong>Bugfix:</strong> Layout-Fehler auf Mobilgeräten behoben.
                 </li>
                 <li>
-                    <strong>Version 1.2.0:</strong> <br>
-                    <strong>Neu:</strong> Unterteilung von To-dos in "Offen" und "Erledigt". <br>
-                                            Design-Updates im Changelog.<br>
+                    <strong>Version 1.2.0:</strong><br>
+                    <strong>Neu:</strong> Unterteilung von To-dos in "Offen" und "Erledigt".<br>
+                    Design-Aktualisierungen in der Änderungsübersicht.
+                </li>
+                <li>
+                    <strong>Version 2.0.0:</strong><br>
+                    <strong>Neu:</strong> Kontosystem, um überall auf die To-dos zuzugreifen.<br>
                 </li>
             </ul>
-        <button onclick="closeChangelog()">Close</button>
-    </div>
+            <button onclick="closeChangelog()" type="button">Schließen</button>
+        </div>
 
-    <div class="version-container">
-        <p class="version">Version 1.2.0</p>
-    </div>
+        <div class="version-container">
+            <p class="version">Version 2.0.0</p>
+        </div>
+    </main>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
