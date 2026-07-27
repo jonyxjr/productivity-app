@@ -4,3 +4,4 @@
 !.dev.vars.example
 .env*
 !.env.example
+.kmc/

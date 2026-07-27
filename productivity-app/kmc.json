@@ -1,0 +1,67 @@
+{
+  "$schema": "https://github.com/marius4lui/kmc/blob/main/schema.json",
+  "groups": [
+    {
+      "id": "npm",
+      "label": "NPM Scripts",
+      "description": "Commands imported from package.json",
+      "icon": "",
+      "type": "imported",
+      "source": "package.json",
+      "commands": [
+        {
+          "id": "npm.dev",
+          "name": "dev",
+          "command": "npm run dev",
+          "description": "next dev",
+          "cwd": ".",
+          "source": "package.json",
+          "imported": true
+        },
+        {
+          "id": "npm.build",
+          "name": "build",
+          "command": "npm run build",
+          "description": "next build",
+          "cwd": ".",
+          "source": "package.json",
+          "imported": true
+        },
+        {
+          "id": "npm.start",
+          "name": "start",
+          "command": "npm run start",
+          "description": "next start",
+          "cwd": ".",
+          "source": "package.json",
+          "imported": true
+        },
+        {
+          "id": "npm.lint",
+          "name": "lint",
+          "command": "npm run lint",
+          "description": "eslint",
+          "cwd": ".",
+          "source": "package.json",
+          "imported": true
+        }
+      ]
+    },
+    {
+      "id": "deployment",
+      "label": "Deployment",
+      "description": "Deploy the application to Vercel",
+      "icon": "",
+      "type": "manual",
+      "commands": [
+        {
+          "id": "deployment.production",
+          "name": "production",
+          "command": "npx vercel --prod",
+          "description": "Deploy the application to Vercel production",
+          "cwd": "."
+        }
+      ]
+    }
+  ]
+}

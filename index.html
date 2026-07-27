@@ -55,6 +55,34 @@
     </section>
 
     <main class="app" id="app" hidden>
+        <button class="profile-launcher" id="profileLauncher" type="button" aria-label="Profil und Einstellungen öffnen">
+            <span class="profile-launcher__avatar" id="profileAvatar">J</span>
+        </button>
+        <div class="profile-backdrop" id="profileBackdrop" hidden></div>
+        <section class="profile-panel" id="profilePanel" aria-hidden="true" aria-label="Profilbereich">
+            <div class="profile-panel__shell">
+                <aside class="profile-panel__categories" aria-label="Profilkategorien">
+                    <div class="profile-panel__header">
+                        <p class="profile-panel__eyebrow">Profil</p>
+                        <h2>Bereiche</h2>
+                    </div>
+                    <div class="profile-panel__category-list" id="profileCategoryList"></div>
+                </aside>
+                <section class="profile-panel__detail">
+                    <div class="profile-detail__topbar">
+                        <button class="profile-icon-button" id="profileBackButton" type="button">Zurück</button>
+                        <button class="profile-icon-button profile-icon-button--ghost" id="profileCloseButton" type="button" aria-label="Profilbereich schließen">Schließen</button>
+                    </div>
+                    <div class="profile-panel__detail-content" id="profileDetailContent">
+                        <div class="profile-detail__empty">
+                            <p class="profile-panel__eyebrow">Willkommen</p>
+                            <h3>Wähle links eine Kategorie aus.</h3>
+                            <p>Hier erscheinen danach die passenden Einstellungen und Aktionen.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
         <div class="top-actions">
             <p id="userStatus">Lokaler Modus</p>
             <button id="btnLogout" type="button">Abmelden</button>
@@ -73,10 +101,6 @@
         <h2>Erledigt</h2>
         <ul id="completedList"></ul>
 
-        <div class="changelog">
-            <button onclick="openChangelog()" type="button">Änderungen</button>
-        </div>
-
         <div class="changelog-content">
             <h2>Änderungen</h2>
             <h3>Geplant</h3>
@@ -89,7 +113,7 @@
                 </li>
                 <li>
                     <strong>Version 2.2.0:</strong><br>
-                    <strong>Neu:</strong> To-dos bearbeiten können.<br>
+                    <strong>Neu:</strong> To-dos direkt bearbeiten können.<br>
                     <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
@@ -99,38 +123,58 @@
                 </li>
                 <li>
                     <strong>Version 2.4.0:</strong><br>
-                    <strong>Neu:</strong> Suchleiste, um To-dos schneller zu finden.<br>
+                    <strong>Neu:</strong> Name einer To-do-Liste bearbeiten und Listen löschen.<br>
                     <strong>Geplant:</strong> Juli 2026
                 </li>
                 <li>
                     <strong>Version 2.5.0:</strong><br>
-                    <strong>Neu:</strong> Datum und Uhrzeit für To-dos hinzufügen.<br>
-                    <strong>Geplant:</strong> Juli 2026
+                    <strong>Neu:</strong> Suchleiste, um To-dos schnell über alle Listen hinweg zu finden.<br>
+                    <strong>Geplant:</strong> Ende Juli 2026
                 </li>
                 <li>
                     <strong>Version 2.6.0:</strong><br>
-                    <strong>Neu:</strong> Filterung von To-dos nach Kategorien.<br>
-                    <strong>Geplant:</strong> Juli 2026
+                    <strong>Neu:</strong> To-dos als wichtig markieren (Favoriten / Priorität) und danach filtern.<br>
+                    <strong>Geplant:</strong> Ende Juli 2026
                 </li>
                 <li>
                     <strong>Version 2.7.0:</strong><br>
-                    <strong>Neu:</strong> To-dos als wichtig markieren und filtern.<br>
-                    <strong>Geplant:</strong> Juli 2026
+                    <strong>Neu:</strong> Kategorien / Tags erstellen und To-dos danach filtern<br>
+                    <strong>Geplant:</strong> Ende Juli 2026
                 </li>
                 <li>
                     <strong>Version 2.8.0:</strong><br>
-                    <strong>Neu:</strong> Name der To-do-Liste bearbeiten und To-do-Listen löschen.<br>
-                    <strong>Geplant:</strong> Juli 2026
+                    <strong>Neu:</strong> Unteraufgaben (Subtasks) hinzufügen, um große To-dos in kleinere Schritte zu unterteilen.<br>
+                    <strong>Geplant:</strong> Ende Juli 2026
                 </li>
                 <li>
                     <strong>Version 2.9.0:</strong><br>
-                    <strong>Neu:</strong> To-dos per Drag & Drop sortieren.<br>
-                    <strong>Geplant:</strong> August 2026
+                    <strong>Neu:</strong> Datum und Uhrzeit (Deadlines) für To-dos hinzufügen.<br>
+                    <strong>Geplant:</strong> Anfang August 2026
+                </li>
+                <li>
+                    <strong>Version 2.10.0:</strong><br>
+                    <strong>Neu:</strong> Wiederkehrende Aufgaben (z. B. täglich, wöchentlich, jeden Monat am 1.).<br>
+                    <strong>Geplant:</strong> Anfang August 2026
+                </li>
+                <li>
+                    <strong>Version 2.11.0:</strong><br>
+                    <strong>Neu:</strong> Push-Benachrichtigungen / Erinnerungen im Browser und auf dem Handy vor Ablauf einer Deadline.<br>
+                    <strong>Geplant:</strong> Anfang August 2026
+                </li>
+                <li>
+                    <strong>Version 2.12.0:</strong><br>
+                    <strong>Neu:</strong> To-dos per Drag & Drop manuell sortieren<br>
+                    <strong>Geplant:</strong> Anfang August 2026
+                </li>
+                <li>
+                    <strong>Version 2.13.0:</strong><br>
+                    <strong>Neu:</strong> „Heute“- und „Demnächst“-Schnittstellen (Smarte Listen, die automatisch alle Aufgaben anzeigen, die heute oder in den nächsten 7 Tagen fällig sind).<br>
+                    <strong>Geplant:</strong> Anfang September 2026
                 </li>
                 <li>
                     <strong>Version 3.0.0:</strong><br>
                     <strong>Neu:</strong> Kalender.<br>
-                    <strong>Geplant:</strong> September 2026
+                    <strong>Geplant:</strong> Ende September 2026
                 </li>
             </ul>
 
