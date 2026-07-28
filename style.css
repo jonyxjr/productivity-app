@@ -524,6 +524,94 @@ button:active {
     box-shadow: 0 12px 24px rgba(239, 68, 68, 0.26);
 }
 
+.edit-btn {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 14px;
+    color: var(--text);
+    background: #e5e7eb;
+    box-shadow: 0 10px 20px rgba(107, 114, 128, 0.16);
+}
+
+.edit-btn:hover {
+    background: #d1d5db;
+    box-shadow: 0 12px 24px rgba(107, 114, 128, 0.22);
+}
+
+.edit-todo-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 48;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(5px);
+}
+
+.edit-todo-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 49;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.edit-todo-dialog.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.edit-todo-dialog__shell {
+    width: min(460px, calc(100vw - 36px));
+    display: grid;
+    gap: 18px;
+    padding: 24px;
+    border: 1px solid rgba(216, 224, 238, 0.9);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+}
+
+.edit-todo-dialog__shell h2 {
+    margin: 0;
+    text-align: center;
+}
+
+#editTodoField {
+    min-height: 48px;
+    width: 100%;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    background: white;
+    font: inherit;
+}
+
+.edit-todo-dialog__actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.edit-todo-dialog__actions button {
+    min-height: 42px;
+    padding: 0 16px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+}
+
+.edit-todo-dialog__cancel {
+    color: var(--text);
+    background: #e5e7eb !important;
+    box-shadow: 0 10px 20px rgba(107, 114, 128, 0.16);
+}
+
 .version-container {
     position: fixed;
     right: 20px;
@@ -801,6 +889,7 @@ button:active {
         flex-wrap: wrap;
     }
 
+    .edit-btn,
     .delete-btn {
         margin-left: 34px;
     }
@@ -1089,6 +1178,34 @@ button:active {
 
 .profile-item button.is-danger {
     background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+}
+
+.profile-item--deleted-todos {
+    gap: 12px;
+}
+
+.deleted-todo-list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.deleted-todo-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(216, 224, 238, 0.86);
+    border-radius: 8px;
+    background: white;
+    overflow-wrap: anywhere;
+}
+
+.deleted-todo-list span {
+    min-width: 0;
 }
 
 .profile-detail__empty {

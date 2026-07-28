@@ -101,17 +101,25 @@
         <h2>Erledigt</h2>
         <ul id="completedList"></ul>
 
+        <div class="edit-todo-backdrop" id="editTodoBackdrop" hidden></div>
+        <section class="edit-todo-dialog" id="editTodoDialog" aria-hidden="true" aria-label="To-do bearbeiten">
+            <div class="edit-todo-dialog__shell">
+                <h2>To do bearbeiten</h2>
+                <input id="editTodoField" autocomplete="off">
+                <div class="edit-todo-dialog__actions">
+                    <button class="edit-todo-dialog__cancel" id="cancelEditTodo" type="button">Abbrechen</button>
+                    <button id="saveEditTodo" type="button">Speichern</button>
+                </div>
+            </div>
+        </section>
+
         <div class="changelog-content">
             <h2>Änderungen</h2>
             <h3>Geplant</h3>
             <ul>
                 
                 
-                <li>
-                    <strong>Version 2.2.0:</strong><br>
-                    <strong>Neu:</strong> To-dos direkt bearbeiten können.<br>
-                    <strong>Geplant:</strong> Juli 2026
-                </li>
+                
                 <li>
                     <strong>Version 2.3.0:</strong><br>
                     <strong>Neu:</strong> Mehrere To-do-Listen erstellen können.<br>
@@ -213,12 +221,16 @@
                     <strong>Version 2.1.0:</strong><br>
                     <strong>Neu:</strong> Profilanzeige und Verwaltung.<br>
                 </li>
+                <li>
+                    <strong>Version 2.2.0:</strong><br>
+                    <strong>Neu:</strong> To-dos direkt bearbeiten können.<br>
+                </li>
             </ul>
             <button onclick="closeChangelog()" type="button">Schließen</button>
         </div>
 
         <div class="version-container">
-            <p class="version">Version 2.1.0</p>
+            <p class="version">Version 2.2.0</p>
         </div>
     </main>
 

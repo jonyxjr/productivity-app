@@ -14,10 +14,12 @@ import {
 const LOGIN_FLAG_KEY = "todoAppLoggedIn";
 const MODE_KEY = "todoAppMode";
 const LOCAL_TODOS_KEY = "todos";
+const LOCAL_DELETED_TODOS_KEY = "deletedTodos";
 const APP_SETTINGS_KEY = "todoAppSettings";
 const PROFILE_ACTIVE_KEY = "todoAppProfileCategory";
 const PROFILE_FEEDBACK_KEY = "todoAppFeedback";
 const LAST_SYNC_KEY = "todoAppLastSync";
+const DELETED_TODO_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 
 const authShell = document.getElementById("authShell");
 const app = document.getElementById("app");
@@ -37,6 +39,11 @@ const todoField = document.getElementById("todoField");
 const addTodoButton = document.getElementById("btn-add-todo");
 const todoList = document.getElementById("todoList");
 const completedList = document.getElementById("completedList");
+const editTodoBackdrop = document.getElementById("editTodoBackdrop");
+const editTodoDialog = document.getElementById("editTodoDialog");
+const editTodoField = document.getElementById("editTodoField");
+const cancelEditTodo = document.getElementById("cancelEditTodo");
+const saveEditTodo = document.getElementById("saveEditTodo");
 const userStatus = document.getElementById("userStatus");
 const btnLogout = document.getElementById("btnLogout");
 const changelogContent = document.querySelector(".changelog-content");
@@ -50,6 +57,8 @@ const profileBackButton = document.getElementById("profileBackButton");
 const profileCloseButton = document.getElementById("profileCloseButton");
 
 let todos = [];
+let deletedTodos = [];
+let editingTodoIndex = null;
 let appMode = "locked";
 let currentUserName = "J";
 let currentUserEmail = "";
@@ -89,14 +98,15 @@ const profileSections = {
             { label: "Cloud-Synchronisierung ein-/ausschalten", type: "toggle", key: "cloudSync" },
             { label: "Letzte Synchronisierung anzeigen", type: "button", action: "lastSync" },
             { label: "Automatische Synchronisierung", type: "toggle", key: "autoSync" },
-            { label: "Offline-Modus", type: "toggle", key: "offlineMode" }
+            { label: "Offline-Modus", type: "toggle", key: "offlineMode" },
+            { label: "Gelöschte To-dos", type: "deletedTodos" }
         ]
     },
     ueber: {
         title: "Über",
         description: "Version, Changelog, Feedback und Hilfe.",
         items: [
-            { label: "App-Version", type: "meta", value: "Version 2.1.0" },
+            { label: "App-Version", type: "meta", value: "Version 2.2.0" },
             { label: "Changelog", type: "changelog" },
             { label: "Feedback senden", type: "button", action: "feedback" },
             { label: "Hilfe", type: "button", action: "help" }
@@ -162,6 +172,9 @@ function wireEvents() {
     registerForm.addEventListener("submit", handleRegister);
     guestButtons.forEach((button) => button.addEventListener("click", startGuestMode));
     addTodoButton.addEventListener("click", addTodo);
+    editTodoBackdrop.addEventListener("click", closeEditTodoDialog);
+    cancelEditTodo.addEventListener("click", closeEditTodoDialog);
+    saveEditTodo.addEventListener("click", saveEditedTodo);
 
     btnLogout.addEventListener("click", async () => {
         if (appMode === "online") {
@@ -181,6 +194,12 @@ function wireEvents() {
         }
     });
 
+    editTodoField.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            saveEditedTodo();
+        }
+    });
+
     profileLauncher.addEventListener("click", openProfilePanel);
     profileBackdrop.addEventListener("click", closeProfilePanel);
     profileCloseButton.addEventListener("click", closeProfilePanel);
@@ -193,6 +212,10 @@ function wireEvents() {
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && profilePanel.classList.contains("is-open")) {
             closeProfilePanel();
+        }
+
+        if (event.key === "Escape" && editTodoDialog.classList.contains("is-open")) {
+            closeEditTodoDialog();
         }
     });
 
@@ -270,16 +293,23 @@ async function startOnlineMode(user) {
 
         if (userSnap.exists()) {
             const data = userSnap.data();
+            const storedDeletedTodos = Array.isArray(data.deletedTodos) ? data.deletedTodos : [];
             todos = Array.isArray(data.todos) ? data.todos : [];
+            deletedTodos = cleanDeletedTodos(storedDeletedTodos);
             currentUserName = data.username || user.email || "J";
             userStatus.textContent = data.username ? `Cloud-Modus: ${data.username}` : "Cloud-Modus";
+            if (deletedTodos.length !== storedDeletedTodos.length) {
+                await setDoc(userRef, { deletedTodos }, { merge: true });
+            }
         } else {
             todos = [];
+            deletedTodos = [];
             currentUserName = user.email || "J";
             await setDoc(userRef, {
                 username: user.email,
                 email: user.email,
-                todos: []
+                todos: [],
+                deletedTodos: []
             }, { merge: true });
         }
     } catch (error) {
@@ -295,6 +325,11 @@ async function startOnlineMode(user) {
 function startGuestMode() {
     appMode = "guest";
     todos = loadLocalTodos();
+    const storedDeletedTodos = loadLocalDeletedTodos();
+    deletedTodos = cleanDeletedTodos(storedDeletedTodos);
+    if (deletedTodos.length !== storedDeletedTodos.length) {
+        localStorage.setItem(LOCAL_DELETED_TODOS_KEY, JSON.stringify(deletedTodos));
+    }
     currentUserName = "Gast";
     currentUserEmail = "";
     localStorage.setItem(MODE_KEY, "guest");
@@ -329,6 +364,16 @@ function showApp() {
 function loadLocalTodos() {
     try {
         const data = localStorage.getItem(LOCAL_TODOS_KEY);
+        const parsed = data ? JSON.parse(data) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+function loadLocalDeletedTodos() {
+    try {
+        const data = localStorage.getItem(LOCAL_DELETED_TODOS_KEY);
         const parsed = data ? JSON.parse(data) : [];
         return Array.isArray(parsed) ? parsed : [];
     } catch {
@@ -547,6 +592,25 @@ function buildProfileItem(item) {
         `;
     }
 
+    if (item.type === "deletedTodos") {
+        const cleanedDeletedTodos = cleanDeletedTodos(deletedTodos);
+        const deletedList = cleanedDeletedTodos.length
+            ? cleanedDeletedTodos.map((todo, index) => `
+                <li>
+                    <span>${escapeHtml(todo.text)}</span>
+                    <button type="button" data-action="restore-todo" data-deleted-index="${index}">Wiederherstellen</button>
+                </li>
+            `).join("")
+            : "<li>Keine gelöschten To-dos aus den letzten 30 Tagen.</li>";
+
+        return `
+            <div class="profile-item profile-item--deleted-todos">
+                <span>${item.label}</span>
+                <ul class="deleted-todo-list">${deletedList}</ul>
+            </div>
+        `;
+    }
+
     return `
         <div class="profile-item profile-item--action">
             <span>${item.label}</span>
@@ -634,6 +698,9 @@ async function handleProfileAction(action, trigger) {
             break;
         case "lastSync":
             openSyncStatus();
+            break;
+        case "restore-todo":
+            await restoreDeletedTodo(Number(trigger?.dataset.deletedIndex));
             break;
         case "open-changelog":
             openChangelog();
@@ -829,7 +896,9 @@ function downloadProfileData(action) {
 }
 
 async function clearCompletedTodos() {
+    const completedTodos = todos.filter((todo) => todo.done);
     todos = todos.filter((todo) => !todo.done);
+    completedTodos.forEach((todo) => moveTodoToTrash(todo));
     await saveTodos();
     renderTodos();
 }
@@ -840,8 +909,10 @@ async function resetAllData() {
     }
 
     todos = [];
+    deletedTodos = [];
     profileState = loadProfileSettings();
     localStorage.removeItem(LOCAL_TODOS_KEY);
+    localStorage.removeItem(LOCAL_DELETED_TODOS_KEY);
     localStorage.removeItem(APP_SETTINGS_KEY);
     saveProfileSettings();
     await saveTodos();
@@ -855,6 +926,7 @@ function updateProfileAvatar() {
 }
 
 async function saveTodos() {
+    deletedTodos = cleanDeletedTodos(deletedTodos);
     const shouldSyncToCloud = appMode === "online"
         && profileState.cloudSync
         && profileState.autoSync
@@ -869,13 +941,60 @@ async function saveTodos() {
         }
 
         await setDoc(doc(db, "users", user.uid), {
-            todos
+            todos,
+            deletedTodos
         }, { merge: true });
         localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
         return;
     }
 
     localStorage.setItem(LOCAL_TODOS_KEY, JSON.stringify(todos));
+    localStorage.setItem(LOCAL_DELETED_TODOS_KEY, JSON.stringify(deletedTodos));
+}
+
+function cleanDeletedTodos(items) {
+    const now = Date.now();
+    return items.filter((todo) => {
+        const deletedAt = new Date(todo.deletedAt).getTime();
+        return todo.text && Number.isFinite(deletedAt) && now - deletedAt < DELETED_TODO_MAX_AGE;
+    });
+}
+
+function moveTodoToTrash(todo) {
+    deletedTodos.unshift({
+        text: todo.text,
+        done: Boolean(todo.done),
+        deletedAt: new Date().toISOString()
+    });
+    deletedTodos = cleanDeletedTodos(deletedTodos);
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+async function restoreDeletedTodo(index) {
+    deletedTodos = cleanDeletedTodos(deletedTodos);
+    const todo = deletedTodos[index];
+
+    if (!todo) {
+        renderProfilePanel();
+        return;
+    }
+
+    todos.push({
+        text: todo.text,
+        done: Boolean(todo.done)
+    });
+    deletedTodos.splice(index, 1);
+    await saveTodos();
+    renderTodos();
+    renderProfilePanel();
 }
 
 function renderTodos() {
@@ -886,6 +1005,7 @@ function renderTodos() {
         const todoItem = document.createElement("li");
         const checkbox = document.createElement("input");
         const text = document.createElement("span");
+        const editButton = document.createElement("button");
         const deleteButton = document.createElement("button");
 
         checkbox.type = "checkbox";
@@ -900,6 +1020,11 @@ function renderTodos() {
             renderTodos();
         });
 
+        editButton.className = "edit-btn";
+        editButton.type = "button";
+        editButton.textContent = "Bearbeiten";
+        editButton.addEventListener("click", () => openEditTodoDialog(index));
+
         deleteButton.className = "delete-btn";
         deleteButton.type = "button";
         deleteButton.textContent = "Löschen";
@@ -909,12 +1034,14 @@ function renderTodos() {
                 return;
             }
 
-            todos.splice(index, 1);
+            const [deletedTodo] = todos.splice(index, 1);
+            moveTodoToTrash(deletedTodo);
             await saveTodos();
             renderTodos();
+            renderProfilePanel();
         });
 
-        todoItem.append(checkbox, text, deleteButton);
+        todoItem.append(checkbox, text, editButton, deleteButton);
 
         if (todo.done) {
             completedList.appendChild(todoItem);
@@ -922,6 +1049,43 @@ function renderTodos() {
             todoList.appendChild(todoItem);
         }
     });
+}
+
+function openEditTodoDialog(index) {
+    editingTodoIndex = index;
+    editTodoField.value = todos[index]?.text || "";
+    editTodoBackdrop.hidden = false;
+    editTodoDialog.classList.add("is-open");
+    editTodoDialog.setAttribute("aria-hidden", "false");
+    editTodoField.focus();
+    editTodoField.select();
+}
+
+function closeEditTodoDialog() {
+    editingTodoIndex = null;
+    editTodoBackdrop.hidden = true;
+    editTodoDialog.classList.remove("is-open");
+    editTodoDialog.setAttribute("aria-hidden", "true");
+    editTodoField.value = "";
+}
+
+async function saveEditedTodo() {
+    const nextText = editTodoField.value.trim();
+
+    if (editingTodoIndex === null || !todos[editingTodoIndex]) {
+        closeEditTodoDialog();
+        return;
+    }
+
+    if (!nextText) {
+        editTodoField.focus();
+        return;
+    }
+
+    todos[editingTodoIndex].text = nextText;
+    await saveTodos();
+    closeEditTodoDialog();
+    renderTodos();
 }
 
 async function addTodo() {
