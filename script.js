@@ -55,6 +55,7 @@ const profileCategoryList = document.getElementById("profileCategoryList");
 const profileDetailContent = document.getElementById("profileDetailContent");
 const profileBackButton = document.getElementById("profileBackButton");
 const profileCloseButton = document.getElementById("profileCloseButton");
+const profileOverviewCloseButton = document.getElementById("profileOverviewCloseButton");
 
 let todos = [];
 let deletedTodos = [];
@@ -64,6 +65,7 @@ let currentUserName = "J";
 let currentUserEmail = "";
 let profileState = loadProfileSettings();
 let currentProfileCategory = localStorage.getItem(PROFILE_ACTIVE_KEY) || "konto";
+let isMobileProfileDetailOpen = false;
 
 const profileSections = {
     konto: {
@@ -203,12 +205,22 @@ function wireEvents() {
     profileLauncher.addEventListener("click", openProfilePanel);
     profileBackdrop.addEventListener("click", closeProfilePanel);
     profileCloseButton.addEventListener("click", closeProfilePanel);
+    profileOverviewCloseButton.addEventListener("click", closeProfilePanel);
     profileBackButton.addEventListener("click", () => {
-        currentProfileCategory = "konto";
-        localStorage.setItem(PROFILE_ACTIVE_KEY, currentProfileCategory);
+        if (isMobileProfileDetailOpen) {
+            isMobileProfileDetailOpen = false;
+        } else {
+            currentProfileCategory = "konto";
+            localStorage.setItem(PROFILE_ACTIVE_KEY, currentProfileCategory);
+        }
         renderProfilePanel();
     });
 
+    document.addEventListener("click", (event) => {
+        if (!event.target.closest(".todo-actions")) {
+            closeTodoActionMenus();
+        }
+    });
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && profilePanel.classList.contains("is-open")) {
             closeProfilePanel();
@@ -446,6 +458,7 @@ function applyStoredTheme() {
 }
 
 function openProfilePanel() {
+    isMobileProfileDetailOpen = !isPhoneLayout();
     profileBackdrop.hidden = false;
     profilePanel.classList.add("is-open");
     profilePanel.setAttribute("aria-hidden", "false");
@@ -453,6 +466,7 @@ function openProfilePanel() {
 }
 
 function closeProfilePanel() {
+    isMobileProfileDetailOpen = false;
     profileBackdrop.hidden = true;
     profilePanel.classList.remove("is-open");
     profilePanel.setAttribute("aria-hidden", "true");
@@ -466,6 +480,7 @@ function renderProfilePanel() {
 
     renderCategoryList();
     renderCategoryDetail(currentProfileCategory);
+    profilePanel.classList.toggle("is-detail-active", !isPhoneLayout() || isMobileProfileDetailOpen);
 }
 
 function renderCategoryList() {
@@ -478,6 +493,7 @@ function renderCategoryList() {
         button.textContent = category.label;
         button.addEventListener("click", () => {
             currentProfileCategory = category.key;
+            isMobileProfileDetailOpen = true;
             localStorage.setItem(PROFILE_ACTIVE_KEY, currentProfileCategory);
             renderProfilePanel();
         });
@@ -920,6 +936,16 @@ async function resetAllData() {
     renderProfilePanel();
 }
 
+function isPhoneLayout() {
+    return window.matchMedia("(max-width: 560px)").matches;
+}
+
+function closeTodoActionMenus() {
+    document.querySelectorAll(".todo-actions.is-open").forEach((actions) => {
+        actions.classList.remove("is-open");
+        actions.querySelector(".todo-menu-button")?.setAttribute("aria-expanded", "false");
+    });
+}
 function updateProfileAvatar() {
     const source = currentUserName || currentUserEmail || "Gast";
     profileAvatar.textContent = source.trim().charAt(0).toUpperCase() || "J";
@@ -1005,6 +1031,9 @@ function renderTodos() {
         const todoItem = document.createElement("li");
         const checkbox = document.createElement("input");
         const text = document.createElement("span");
+        const actions = document.createElement("div");
+        const menuButton = document.createElement("button");
+        const actionMenu = document.createElement("div");
         const editButton = document.createElement("button");
         const deleteButton = document.createElement("button");
 
@@ -1013,6 +1042,23 @@ function renderTodos() {
 
         text.className = "todo-text";
         text.textContent = todo.text;
+
+        actions.className = "todo-actions";
+
+        menuButton.className = "todo-menu-button";
+        menuButton.type = "button";
+        menuButton.textContent = "⋮";
+        menuButton.setAttribute("aria-label", "To-do Aktionen öffnen");
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const isOpen = actions.classList.contains("is-open");
+            closeTodoActionMenus();
+            actions.classList.toggle("is-open", !isOpen);
+            menuButton.setAttribute("aria-expanded", String(!isOpen));
+        });
+
+        actionMenu.className = "todo-action-menu";
 
         checkbox.addEventListener("change", async () => {
             todos[index].done = checkbox.checked;
@@ -1023,13 +1069,17 @@ function renderTodos() {
         editButton.className = "edit-btn";
         editButton.type = "button";
         editButton.textContent = "Bearbeiten";
-        editButton.addEventListener("click", () => openEditTodoDialog(index));
+        editButton.addEventListener("click", () => {
+            closeTodoActionMenus();
+            openEditTodoDialog(index);
+        });
 
         deleteButton.className = "delete-btn";
         deleteButton.type = "button";
         deleteButton.textContent = "Löschen";
 
         deleteButton.addEventListener("click", async () => {
+            closeTodoActionMenus();
             if (!confirm("Möchtest du dieses To-do wirklich löschen?")) {
                 return;
             }
@@ -1041,7 +1091,9 @@ function renderTodos() {
             renderProfilePanel();
         });
 
-        todoItem.append(checkbox, text, editButton, deleteButton);
+        actionMenu.append(editButton, deleteButton);
+        actions.append(menuButton, actionMenu);
+        todoItem.append(checkbox, text, actions);
 
         if (todo.done) {
             completedList.appendChild(todoItem);
