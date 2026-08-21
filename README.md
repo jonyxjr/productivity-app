@@ -6,7 +6,7 @@ The project started as a simple To-do list and has continuously evolved into a m
 
 🌐 Live Demo
 
-⸻
+
 
 🚀 About the Project
 
@@ -18,7 +18,7 @@ Over time, I added new functionality, redesigned parts of the application and st
 
 Today, the project includes features such as user accounts, cloud-synchronized tasks, profiles and task management. The long-term goal is to turn the original To-do list into a complete productivity application.
 
-⸻
+
 
 ✨ Current Features
 
@@ -53,7 +53,7 @@ Additional Features
 * Responsive design
 * Continuous feature and design improvements
 
-⸻
+
 
 🛠️ Tech Stack
 
@@ -74,7 +74,7 @@ Development Tools
 * GitHub
 * AI-assisted development
 
-⸻
+
 
 🌐 Live Demo
 
@@ -84,7 +84,7 @@ Open the Productivity Web App
 
 The application can be used in local mode without creating an account. Users can also create an account to synchronize their tasks through Firebase.
 
-⸻
+
 
 📈 Development Journey
 
@@ -118,7 +118,7 @@ I started planning future versions, defining individual features and organizing 
 
 The goal is to gradually transform the original To-do list into a complete productivity application.
 
-⸻
+
 
 🤖 AI-Assisted Development
 
@@ -138,7 +138,7 @@ I define the ideas and requirements for new features and use AI as a development
 
 This project has helped me learn how to work with AI as a programming and learning tool rather than only using it to generate individual pieces of code.
 
-⸻
+
 
 📚 What I Have Learned
 
@@ -164,7 +164,7 @@ Through this project, I have gained practical experience with:
 
 More importantly, I have learned how a project can evolve from a simple idea into a larger application through continuous development.
 
-⸻
+
 
 📦 Version History
 
@@ -210,7 +210,7 @@ Version 0.5.0-beta
 
 * Added, deleted and completed tasks
 
-⸻
+
 
 🗺️ Roadmap
 
@@ -268,7 +268,7 @@ Version 3.0.0
 
 * Calendar
 
-⸻
+
 
 🎯 Project Goal
 
@@ -276,7 +276,7 @@ The long-term goal is to transform the original To-do list into a modern product
 
 The application will continue to evolve through new features and improvements.
 
-⸻
+
 
 🚧 Project Status
 
@@ -286,7 +286,7 @@ This project is continuously being developed and improved.
 
 New features are planned and implemented step by step as I continue learning and expanding my programming skills.
 
-⸻
+
 
 📌 Note
 
