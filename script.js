@@ -108,7 +108,7 @@ const profileSections = {
         title: "Über",
         description: "Version, Changelog, Feedback und Hilfe.",
         items: [
-            { label: "App-Version", type: "meta", value: "Version 2.2.1" },
+            { label: "App-Version", type: "meta", value: "Version 2.2.2" },
             { label: "Changelog", type: "changelog" },
             { label: "Feedback senden", type: "button", action: "feedback" },
             { label: "Hilfe", type: "button", action: "help" }
