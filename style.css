@@ -565,6 +565,11 @@ button:active {
     backdrop-filter: blur(18px);
 }
 
+#todoList:has(.todo-actions.is-open) {
+    position: relative;
+    z-index: 10;
+}
+
 #todoList:not(:has(li)),
 #completedList:not(:has(li)) {
     display: none;
@@ -1017,7 +1022,7 @@ button:active {
     }
 
     .todo-actions.is-open {
-        z-index: 25;
+        z-index: 9999;
     }
 
     .todo-menu-button {
@@ -1037,7 +1042,7 @@ button:active {
         position: absolute;
         top: calc(100% + 8px);
         right: 0;
-        z-index: 30;
+        z-index: 9999;
         display: none;
         min-width: 150px;
         padding: 8px;
