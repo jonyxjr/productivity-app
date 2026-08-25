@@ -218,11 +218,8 @@ The application is continuously being developed.
 
 Version 2.3.0
 
-* Multiple To-do lists
-
-Version 2.4.0
-
-* Rename and delete To-do lists
+* Multiple To-do lists with individual tasks and optional subtitles
+* Switch, rename and delete To-do lists
 
 Version 2.5.0
 

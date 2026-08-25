@@ -89,7 +89,20 @@
             <button id="btnLogout" type="button">Abmelden</button>
         </div>
 
-        <h1>Meine To-do Liste</h1>
+        <header class="list-header">
+            <h1 id="activeListName">Meine To-do Liste</h1>
+            <p id="activeListSubtitle" class="list-header__subtitle" hidden></p>
+            <div class="list-switcher" id="listSwitcher" aria-label="To-do-Listen wechseln">
+                <button id="previousList" type="button" aria-label="Vorherige Liste">‹</button>
+                <button class="list-switcher__current" id="openListPicker" type="button" aria-label="Listenübersicht öffnen">
+                    <span id="activeListPickerName">Meine To-do Liste</span>
+                    <span id="listIndicators" class="list-switcher__indicators" aria-hidden="true"></span>
+                </button>
+                <button id="nextList" type="button" aria-label="Nächste Liste">›</button>
+                <button class="list-switcher__edit" id="editActiveList" type="button" aria-label="Liste bearbeiten">✎</button>
+                <button class="list-switcher__add" id="addList" type="button" aria-label="Neue Liste erstellen">+</button>
+            </div>
+        </header>
 
         <div class="todo-input-row">
             <input id="todoField" placeholder="Bitte To-do eingeben" autocomplete="off">
@@ -114,6 +127,29 @@
             </div>
         </section>
 
+        <div class="edit-todo-backdrop" id="listDialogBackdrop" hidden></div>
+        <section class="edit-todo-dialog" id="listDialog" aria-hidden="true" aria-label="To-do-Liste bearbeiten">
+            <div class="edit-todo-dialog__shell list-dialog__shell">
+                <div class="list-dialog__topbar">
+                    <h2 id="listDialogTitle">Neue To-do-Liste</h2>
+                    <button class="edit-todo-dialog__cancel" id="cancelListDialog" type="button">Abbrechen</button>
+                </div>
+                <label class="list-dialog__field">Name<input id="listNameField" autocomplete="off" maxlength="80"></label>
+                <label class="list-dialog__field">Untertitel <span>(optional)</span><input id="listSubtitleField" autocomplete="off" maxlength="160"></label>
+                <div class="edit-todo-dialog__actions list-dialog__actions">
+                    <button id="saveListDialog" type="button">Fertig</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="edit-todo-backdrop" id="listPickerBackdrop" hidden></div>
+        <section class="edit-todo-dialog" id="listPickerDialog" aria-hidden="true" aria-label="Meine Listen">
+            <div class="edit-todo-dialog__shell list-dialog__shell">
+                <div class="list-dialog__topbar"><h2>Meine Listen</h2><button class="edit-todo-dialog__cancel" id="closeListPicker" type="button">Schließen</button></div>
+                <div class="list-picker" id="listPicker"></div>
+            </div>
+        </section>
+
         <div class="changelog-content">
             <h2>Änderungen</h2>
             <h3>Geplant</h3>
@@ -122,54 +158,44 @@
                 
                 
                 <li>
-                    <strong>Version 2.3.0:</strong><br>
-                    <strong>Neu:</strong> Mehrere To-do-Listen erstellen können.<br>
-                    <strong>Geplant:</strong> Juli 2026
-                </li>
-                <li>
-                    <strong>Version 2.4.0:</strong><br>
-                    <strong>Neu:</strong> Name einer To-do-Liste bearbeiten und Listen löschen.<br>
-                    <strong>Geplant:</strong> Juli 2026
-                </li>
-                <li>
                     <strong>Version 2.5.0:</strong><br>
                     <strong>Neu:</strong> Suchleiste, um To-dos schnell über alle Listen hinweg zu finden.<br>
-                    <strong>Geplant:</strong> Ende Juli 2026
+                    <strong>Geplant:</strong> 25. August 2026
                 </li>
                 <li>
                     <strong>Version 2.6.0:</strong><br>
                     <strong>Neu:</strong> To-dos als wichtig markieren (Favoriten / Priorität) und danach filtern.<br>
-                    <strong>Geplant:</strong> Ende Juli 2026
+                    <strong>Geplant:</strong> 26. August 2026
                 </li>
                 <li>
                     <strong>Version 2.7.0:</strong><br>
                     <strong>Neu:</strong> Kategorien / Tags erstellen und To-dos danach filtern<br>
-                    <strong>Geplant:</strong> Ende Juli 2026
+                    <strong>Geplant:</strong> 27. August 2026
                 </li>
                 <li>
                     <strong>Version 2.8.0:</strong><br>
                     <strong>Neu:</strong> Unteraufgaben (Subtasks) hinzufügen, um große To-dos in kleinere Schritte zu unterteilen.<br>
-                    <strong>Geplant:</strong> Ende Juli 2026
+                    <strong>Geplant:</strong> 28. August 2026
                 </li>
                 <li>
                     <strong>Version 2.9.0:</strong><br>
                     <strong>Neu:</strong> Datum und Uhrzeit (Deadlines) für To-dos hinzufügen.<br>
-                    <strong>Geplant:</strong> Anfang August 2026
+                    <strong>Geplant:</strong> 29. August 2026
                 </li>
                 <li>
                     <strong>Version 2.10.0:</strong><br>
                     <strong>Neu:</strong> Wiederkehrende Aufgaben (z. B. täglich, wöchentlich, jeden Monat am 1.).<br>
-                    <strong>Geplant:</strong> Anfang August 2026
+                    <strong>Geplant:</strong> 30. August 2026
                 </li>
                 <li>
                     <strong>Version 2.11.0:</strong><br>
                     <strong>Neu:</strong> Push-Benachrichtigungen / Erinnerungen im Browser und auf dem Handy vor Ablauf einer Deadline.<br>
-                    <strong>Geplant:</strong> Anfang August 2026
+                    <strong>Geplant:</strong> 31. August 2026
                 </li>
                 <li>
                     <strong>Version 2.12.0:</strong><br>
                     <strong>Neu:</strong> To-dos per Drag & Drop manuell sortieren<br>
-                    <strong>Geplant:</strong> Anfang August 2026
+                    <strong>Geplant:</strong> Anfang September 2026
                 </li>
                 <li>
                     <strong>Version 2.13.0:</strong><br>
@@ -226,12 +252,16 @@
                     <strong>Version 2.2.0:</strong><br>
                     <strong>Neu:</strong> To-dos direkt bearbeiten können.<br>
                 </li>
+                <li>
+                    <strong>Version 2.3.0:</strong><br>
+                    <strong>Neu:</strong> Mehrere To-do-Listen mit eigenen To-dos, Untertiteln, Bearbeitung und Löschen.<br>
+                </li>
             </ul>
             <button onclick="closeChangelog()" type="button">Schließen</button>
         </div>
 
         <div class="version-container">
-            <p class="version">Version 2.2.2</p>
+            <p class="version">Version 2.3.0</p>
         </div>
     </main>
 
