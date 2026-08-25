@@ -15,6 +15,8 @@ const LOGIN_FLAG_KEY = "todoAppLoggedIn";
 const MODE_KEY = "todoAppMode";
 const LOCAL_TODOS_KEY = "todos";
 const LOCAL_DELETED_TODOS_KEY = "deletedTodos";
+const LOCAL_LISTS_KEY = "todoAppLists";
+const ACTIVE_LIST_KEY = "todoAppActiveList";
 const APP_SETTINGS_KEY = "todoAppSettings";
 const PROFILE_ACTIVE_KEY = "todoAppProfileCategory";
 const PROFILE_FEEDBACK_KEY = "todoAppFeedback";
@@ -56,10 +58,34 @@ const profileDetailContent = document.getElementById("profileDetailContent");
 const profileBackButton = document.getElementById("profileBackButton");
 const profileCloseButton = document.getElementById("profileCloseButton");
 const profileOverviewCloseButton = document.getElementById("profileOverviewCloseButton");
+const activeListName = document.getElementById("activeListName");
+const activeListSubtitle = document.getElementById("activeListSubtitle");
+const activeListPickerName = document.getElementById("activeListPickerName");
+const listSwitcher = document.getElementById("listSwitcher");
+const previousList = document.getElementById("previousList");
+const nextList = document.getElementById("nextList");
+const openListPicker = document.getElementById("openListPicker");
+const listIndicators = document.getElementById("listIndicators");
+const addListButton = document.getElementById("addList");
+const editActiveListButton = document.getElementById("editActiveList");
+const listDialogBackdrop = document.getElementById("listDialogBackdrop");
+const listDialog = document.getElementById("listDialog");
+const listDialogTitle = document.getElementById("listDialogTitle");
+const listNameField = document.getElementById("listNameField");
+const listSubtitleField = document.getElementById("listSubtitleField");
+const cancelListDialog = document.getElementById("cancelListDialog");
+const saveListDialog = document.getElementById("saveListDialog");
+const listPickerBackdrop = document.getElementById("listPickerBackdrop");
+const listPickerDialog = document.getElementById("listPickerDialog");
+const listPicker = document.getElementById("listPicker");
+const closeListPickerButton = document.getElementById("closeListPicker");
 
 let todos = [];
+let lists = [];
+let activeListId = null;
 let deletedTodos = [];
 let editingTodoIndex = null;
+let editingListId = null;
 let appMode = "locked";
 let currentUserName = "J";
 let currentUserEmail = "";
@@ -108,7 +134,7 @@ const profileSections = {
         title: "Über",
         description: "Version, Changelog, Feedback und Hilfe.",
         items: [
-            { label: "App-Version", type: "meta", value: "Version 2.2.2" },
+            { label: "App-Version", type: "meta", value: "Version 2.3.0" },
             { label: "Changelog", type: "changelog" },
             { label: "Feedback senden", type: "button", action: "feedback" },
             { label: "Hilfe", type: "button", action: "help" }
@@ -177,6 +203,28 @@ function wireEvents() {
     editTodoBackdrop.addEventListener("click", closeEditTodoDialog);
     cancelEditTodo.addEventListener("click", closeEditTodoDialog);
     saveEditTodo.addEventListener("click", saveEditedTodo);
+    previousList.addEventListener("click", () => switchList(-1));
+    nextList.addEventListener("click", () => switchList(1));
+    openListPicker.addEventListener("click", openListPickerDialog);
+    addListButton.addEventListener("click", () => openListDialog());
+    editActiveListButton.addEventListener("click", () => openListDialog(getActiveList()));
+    listDialogBackdrop.addEventListener("click", closeListDialog);
+    cancelListDialog.addEventListener("click", closeListDialog);
+    saveListDialog.addEventListener("click", saveListDialogData);
+    listPickerBackdrop.addEventListener("click", closeListPickerDialog);
+    closeListPickerButton.addEventListener("click", closeListPickerDialog);
+
+    let touchStartX = null;
+    listSwitcher.addEventListener("touchstart", (event) => {
+        touchStartX = event.changedTouches[0]?.clientX ?? null;
+    }, { passive: true });
+    listSwitcher.addEventListener("touchend", (event) => {
+        const endX = event.changedTouches[0]?.clientX;
+        if (touchStartX === null || typeof endX !== "number") return;
+        const distance = endX - touchStartX;
+        touchStartX = null;
+        if (Math.abs(distance) >= 48) switchList(distance < 0 ? 1 : -1);
+    }, { passive: true });
 
     btnLogout.addEventListener("click", async () => {
         if (appMode === "online") {
@@ -184,6 +232,8 @@ function wireEvents() {
         }
 
         todos = [];
+        lists = [];
+        activeListId = null;
         localStorage.removeItem(LOGIN_FLAG_KEY);
         localStorage.removeItem(MODE_KEY);
         closeProfilePanel();
@@ -229,6 +279,10 @@ function wireEvents() {
         if (event.key === "Escape" && editTodoDialog.classList.contains("is-open")) {
             closeEditTodoDialog();
         }
+        if (event.key === "Escape") {
+            closeListDialog();
+            closeListPickerDialog();
+        }
     });
 
     document.querySelector(".changelog button")?.addEventListener("click", openChangelog);
@@ -252,14 +306,16 @@ async function handleRegister(event) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        todos = [];
+        lists = [createList("Meine To-do Liste", "Organisiert. Klar. Erledigt.")];
+        activeListId = lists[0].id;
+        todos = lists[0].todos;
         currentUserName = username;
         currentUserEmail = email;
         updateProfileAvatar();
         await setDoc(doc(db, "users", user.uid), {
             username,
             email,
-            todos: []
+            lists
         }, { merge: true });
 
         localStorage.setItem(LOGIN_FLAG_KEY, "true");
@@ -306,21 +362,23 @@ async function startOnlineMode(user) {
         if (userSnap.exists()) {
             const data = userSnap.data();
             const storedDeletedTodos = Array.isArray(data.deletedTodos) ? data.deletedTodos : [];
-            todos = Array.isArray(data.todos) ? data.todos : [];
+            const didMigrate = initializeLists(data.lists, data.todos);
             deletedTodos = cleanDeletedTodos(storedDeletedTodos);
             currentUserName = data.username || user.email || "J";
             userStatus.textContent = data.username ? `Cloud-Modus: ${data.username}` : "Cloud-Modus";
-            if (deletedTodos.length !== storedDeletedTodos.length) {
-                await setDoc(userRef, { deletedTodos }, { merge: true });
+            if (didMigrate || deletedTodos.length !== storedDeletedTodos.length) {
+                await setDoc(userRef, { lists, deletedTodos }, { merge: true });
             }
         } else {
-            todos = [];
+            lists = [createList("Meine To-do Liste", "Organisiert. Klar. Erledigt.")];
+            activeListId = lists[0].id;
+            todos = lists[0].todos;
             deletedTodos = [];
             currentUserName = user.email || "J";
             await setDoc(userRef, {
                 username: user.email,
                 email: user.email,
-                todos: [],
+                lists,
                 deletedTodos: []
             }, { merge: true });
         }
@@ -330,16 +388,18 @@ async function startOnlineMode(user) {
     }
 
     updateProfileAvatar();
+    updateListUI();
     renderTodos();
     showApp();
 }
 
 function startGuestMode() {
     appMode = "guest";
-    todos = loadLocalTodos();
+    const didMigrate = initializeLists(loadLocalLists(), loadLocalTodos());
     const storedDeletedTodos = loadLocalDeletedTodos();
     deletedTodos = cleanDeletedTodos(storedDeletedTodos);
-    if (deletedTodos.length !== storedDeletedTodos.length) {
+    if (didMigrate || deletedTodos.length !== storedDeletedTodos.length) {
+        localStorage.setItem(LOCAL_LISTS_KEY, JSON.stringify(lists));
         localStorage.setItem(LOCAL_DELETED_TODOS_KEY, JSON.stringify(deletedTodos));
     }
     currentUserName = "Gast";
@@ -348,6 +408,7 @@ function startGuestMode() {
     localStorage.removeItem(LOGIN_FLAG_KEY);
     userStatus.textContent = "Lokaler Modus";
     updateProfileAvatar();
+    updateListUI();
     renderTodos();
     showApp();
 }
@@ -381,6 +442,191 @@ function loadLocalTodos() {
     } catch {
         return [];
     }
+}
+
+function loadLocalLists() {
+    try {
+        const data = localStorage.getItem(LOCAL_LISTS_KEY);
+        const parsed = data ? JSON.parse(data) : null;
+        return Array.isArray(parsed) ? parsed : null;
+    } catch {
+        return null;
+    }
+}
+
+function createList(name, subtitle = "", listTodos = []) {
+    return {
+        id: typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+            ? crypto.randomUUID()
+            : `list-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        name: name.trim(),
+        subtitle: subtitle.trim(),
+        todos: Array.isArray(listTodos) ? listTodos : []
+    };
+}
+
+function initializeLists(storedLists, legacyTodos = []) {
+    const hasLists = Array.isArray(storedLists) && storedLists.length > 0;
+    lists = hasLists
+        ? storedLists.map((list) => ({
+            id: typeof list?.id === "string" && list.id ? list.id : createList("", "").id,
+            name: typeof list?.name === "string" && list.name.trim() ? list.name.trim() : "Meine To-do Liste",
+            subtitle: typeof list?.subtitle === "string" ? list.subtitle.trim() : "",
+            todos: Array.isArray(list?.todos) ? list.todos : []
+        }))
+        : [createList("Meine To-do Liste", "Organisiert. Klar. Erledigt.", legacyTodos)];
+
+    const storedActiveId = localStorage.getItem(ACTIVE_LIST_KEY);
+    activeListId = lists.some((list) => list.id === storedActiveId) ? storedActiveId : lists[0].id;
+    todos = getActiveList().todos;
+    localStorage.setItem(ACTIVE_LIST_KEY, activeListId);
+    return !hasLists;
+}
+
+function getActiveList() {
+    return lists.find((list) => list.id === activeListId) || lists[0] || null;
+}
+
+function setActiveTodos(nextTodos) {
+    const activeList = getActiveList();
+    if (!activeList) return;
+    activeList.todos = nextTodos;
+    todos = activeList.todos;
+}
+
+function selectList(id, shouldRender = true) {
+    const nextList = lists.find((list) => list.id === id);
+    if (!nextList) return;
+    activeListId = nextList.id;
+    todos = nextList.todos;
+    localStorage.setItem(ACTIVE_LIST_KEY, activeListId);
+    updateListUI();
+    if (shouldRender) renderTodos();
+}
+
+function switchList(direction) {
+    if (lists.length < 2) return;
+    const currentIndex = Math.max(0, lists.findIndex((list) => list.id === activeListId));
+    selectList(lists[(currentIndex + direction + lists.length) % lists.length].id);
+}
+
+function updateListUI() {
+    const activeList = getActiveList();
+    if (!activeList) return;
+    activeListName.textContent = activeList.name;
+    activeListPickerName.textContent = activeList.name;
+    activeListSubtitle.textContent = activeList.subtitle;
+    activeListSubtitle.hidden = !activeList.subtitle;
+    listIndicators.innerHTML = lists.map((list) => `<span class="${list.id === activeList.id ? "is-active" : ""}"></span>`).join("");
+    previousList.disabled = lists.length < 2;
+    nextList.disabled = lists.length < 2;
+}
+
+function openListDialog(list = null) {
+    editingListId = list?.id || null;
+    listDialogTitle.textContent = list ? "To-do-Liste bearbeiten" : "Neue To-do-Liste";
+    saveListDialog.textContent = list ? "Speichern" : "Fertig";
+    listNameField.value = list?.name || "";
+    listSubtitleField.value = list?.subtitle || "";
+    listDialogBackdrop.hidden = false;
+    listDialog.classList.add("is-open");
+    listDialog.setAttribute("aria-hidden", "false");
+    listNameField.focus();
+}
+
+function closeListDialog() {
+    if (!listDialog.classList.contains("is-open")) return;
+    editingListId = null;
+    listDialogBackdrop.hidden = true;
+    listDialog.classList.remove("is-open");
+    listDialog.setAttribute("aria-hidden", "true");
+}
+
+async function saveListDialogData() {
+    const name = listNameField.value.trim();
+    if (!name) {
+        listNameField.focus();
+        return;
+    }
+    const subtitle = listSubtitleField.value.trim();
+    if (editingListId) {
+        const list = lists.find((item) => item.id === editingListId);
+        if (list) {
+            list.name = name;
+            list.subtitle = subtitle;
+        }
+    } else {
+        const list = createList(name, subtitle);
+        lists.push(list);
+        selectList(list.id, false);
+    }
+    await saveTodos();
+    updateListUI();
+    closeListDialog();
+    renderTodos();
+    if (listPickerDialog.classList.contains("is-open")) renderListPicker();
+}
+
+function openListPickerDialog() {
+    renderListPicker();
+    listPickerBackdrop.hidden = false;
+    listPickerDialog.classList.add("is-open");
+    listPickerDialog.setAttribute("aria-hidden", "false");
+}
+
+function closeListPickerDialog() {
+    if (!listPickerDialog.classList.contains("is-open")) return;
+    listPickerBackdrop.hidden = true;
+    listPickerDialog.classList.remove("is-open");
+    listPickerDialog.setAttribute("aria-hidden", "true");
+}
+
+function renderListPicker() {
+    listPicker.innerHTML = "";
+    lists.forEach((list) => {
+        const row = document.createElement("div");
+        row.className = `list-picker__row${list.id === activeListId ? " is-active" : ""}`;
+        const selectButton = document.createElement("button");
+        selectButton.type = "button";
+        selectButton.className = "list-picker__select";
+        selectButton.innerHTML = `<strong>${escapeHtml(list.name)}</strong>${list.subtitle ? `<span>${escapeHtml(list.subtitle)}</span>` : ""}`;
+        selectButton.addEventListener("click", () => {
+            selectList(list.id);
+            closeListPickerDialog();
+        });
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "list-picker__icon";
+        editButton.textContent = "✎";
+        editButton.setAttribute("aria-label", `${list.name} bearbeiten`);
+        editButton.addEventListener("click", () => {
+            closeListPickerDialog();
+            openListDialog(list);
+        });
+        row.append(selectButton, editButton);
+        if (lists.length > 1) {
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "list-picker__icon list-picker__delete";
+            deleteButton.textContent = "⌫";
+            deleteButton.setAttribute("aria-label", `${list.name} löschen`);
+            deleteButton.addEventListener("click", () => deleteList(list));
+            row.appendChild(deleteButton);
+        }
+        listPicker.appendChild(row);
+    });
+}
+
+async function deleteList(list) {
+    if (lists.length <= 1 || !confirm(`Liste löschen?\n\nMöchtest du „${list.name}“ wirklich löschen?\nDie Liste und alle darin enthaltenen To-dos werden ebenfalls gelöscht.`)) return;
+    const index = lists.findIndex((item) => item.id === list.id);
+    lists.splice(index, 1);
+    deletedTodos = deletedTodos.filter((todo) => todo.listId !== list.id);
+    if (activeListId === list.id) selectList(lists[Math.max(0, index - 1)].id, false);
+    await saveTodos();
+    updateListUI();
+    renderTodos();
+    renderListPicker();
 }
 
 function loadLocalDeletedTodos() {
@@ -613,7 +859,7 @@ function buildProfileItem(item) {
         const deletedList = cleanedDeletedTodos.length
             ? cleanedDeletedTodos.map((todo, index) => `
                 <li>
-                    <span>${escapeHtml(todo.text)}</span>
+                    <span>${escapeHtml(todo.text)}${todo.listId ? ` <small>(${escapeHtml(lists.find((list) => list.id === todo.listId)?.name || "Entfernte Liste")})</small>` : ""}</span>
                     <button type="button" data-action="restore-todo" data-deleted-index="${index}">Wiederherstellen</button>
                 </li>
             `).join("")
@@ -841,7 +1087,7 @@ async function importProfileData(file) {
         }).filter((item) => item.text);
 
         if (imported.length) {
-            todos = imported;
+            setActiveTodos(imported);
             await saveTodos();
             renderTodos();
         }
@@ -850,8 +1096,13 @@ async function importProfileData(file) {
 
     try {
         const parsed = JSON.parse(text);
-        if (Array.isArray(parsed.todos)) {
-            todos = parsed.todos;
+        if (Array.isArray(parsed.lists)) {
+            initializeLists(parsed.lists, []);
+            await saveTodos();
+            updateListUI();
+            renderTodos();
+        } else if (Array.isArray(parsed.todos)) {
+            setActiveTodos(parsed.todos);
             await saveTodos();
             renderTodos();
         }
@@ -881,6 +1132,7 @@ function downloadProfileData(action) {
             email: currentUserEmail
         },
         settings: profileState,
+        lists,
         todos
     };
 
@@ -913,7 +1165,7 @@ function downloadProfileData(action) {
 
 async function clearCompletedTodos() {
     const completedTodos = todos.filter((todo) => todo.done);
-    todos = todos.filter((todo) => !todo.done);
+    setActiveTodos(todos.filter((todo) => !todo.done));
     completedTodos.forEach((todo) => moveTodoToTrash(todo));
     await saveTodos();
     renderTodos();
@@ -924,14 +1176,20 @@ async function resetAllData() {
         return;
     }
 
-    todos = [];
+    lists = [createList("Meine To-do Liste", "Organisiert. Klar. Erledigt.")];
+    activeListId = lists[0].id;
+    todos = lists[0].todos;
     deletedTodos = [];
     profileState = loadProfileSettings();
     localStorage.removeItem(LOCAL_TODOS_KEY);
+    localStorage.removeItem(LOCAL_LISTS_KEY);
+    localStorage.removeItem(ACTIVE_LIST_KEY);
     localStorage.removeItem(LOCAL_DELETED_TODOS_KEY);
     localStorage.removeItem(APP_SETTINGS_KEY);
+    localStorage.setItem(ACTIVE_LIST_KEY, activeListId);
     saveProfileSettings();
     await saveTodos();
+    updateListUI();
     renderTodos();
     renderProfilePanel();
 }
@@ -967,14 +1225,14 @@ async function saveTodos() {
         }
 
         await setDoc(doc(db, "users", user.uid), {
-            todos,
+            lists,
             deletedTodos
         }, { merge: true });
         localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
         return;
     }
 
-    localStorage.setItem(LOCAL_TODOS_KEY, JSON.stringify(todos));
+    localStorage.setItem(LOCAL_LISTS_KEY, JSON.stringify(lists));
     localStorage.setItem(LOCAL_DELETED_TODOS_KEY, JSON.stringify(deletedTodos));
 }
 
@@ -990,6 +1248,7 @@ function moveTodoToTrash(todo) {
     deletedTodos.unshift({
         text: todo.text,
         done: Boolean(todo.done),
+        listId: activeListId,
         deletedAt: new Date().toISOString()
     });
     deletedTodos = cleanDeletedTodos(deletedTodos);
@@ -1013,7 +1272,8 @@ async function restoreDeletedTodo(index) {
         return;
     }
 
-    todos.push({
+    const restoreList = lists.find((list) => list.id === todo.listId) || getActiveList();
+    restoreList.todos.push({
         text: todo.text,
         done: Boolean(todo.done)
     });
