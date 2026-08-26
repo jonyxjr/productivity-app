@@ -58,6 +58,9 @@
         <button class="profile-launcher" id="profileLauncher" type="button" aria-label="Profil und Einstellungen öffnen">
             <span class="profile-launcher__avatar" id="profileAvatar">J</span>
         </button>
+        <button class="search-toggle" id="searchToggle" type="button" aria-label="Suche öffnen" aria-controls="search" aria-expanded="false">
+            <span aria-hidden="true">⌕</span>
+        </button>
         <div class="profile-backdrop" id="profileBackdrop" hidden></div>
         <section class="profile-panel" id="profilePanel" aria-hidden="true" aria-label="Profilbereich">
             <div class="profile-panel__shell">
@@ -88,6 +91,15 @@
             <p id="userStatus">Lokaler Modus</p>
             <button id="btnLogout" type="button">Abmelden</button>
         </div>
+
+        <section class="search" id="search" aria-label="To-dos und Listen durchsuchen">
+            <label class="search__field" for="searchField">
+                <span class="search__icon" aria-hidden="true">⌕</span>
+                <input id="searchField" type="search" placeholder="To-dos und Listen suchen..." autocomplete="off" aria-controls="searchPanel" aria-expanded="false">
+            </label>
+            <button class="search__mobile-close" id="closeMobileSearch" type="button" aria-label="Suche schließen">×</button>
+            <div class="search__panel" id="searchPanel" role="region" aria-live="polite" hidden></div>
+        </section>
 
         <header class="list-header">
             <h1 id="activeListName">Meine To-do Liste</h1>
@@ -157,48 +169,44 @@
                 
                 
                 
+                
                 <li>
                     <strong>Version 2.5.0:</strong><br>
-                    <strong>Neu:</strong> Suchleiste, um To-dos schnell über alle Listen hinweg zu finden.<br>
-                    <strong>Geplant:</strong> 25. August 2026
-                </li>
-                <li>
-                    <strong>Version 2.6.0:</strong><br>
                     <strong>Neu:</strong> To-dos als wichtig markieren (Favoriten / Priorität) und danach filtern.<br>
                     <strong>Geplant:</strong> 26. August 2026
                 </li>
                 <li>
-                    <strong>Version 2.7.0:</strong><br>
+                    <strong>Version 2.6.0:</strong><br>
                     <strong>Neu:</strong> Kategorien / Tags erstellen und To-dos danach filtern<br>
                     <strong>Geplant:</strong> 27. August 2026
                 </li>
                 <li>
-                    <strong>Version 2.8.0:</strong><br>
+                    <strong>Version 2.7.0:</strong><br>
                     <strong>Neu:</strong> Unteraufgaben (Subtasks) hinzufügen, um große To-dos in kleinere Schritte zu unterteilen.<br>
                     <strong>Geplant:</strong> 28. August 2026
                 </li>
                 <li>
-                    <strong>Version 2.9.0:</strong><br>
+                    <strong>Version 2.8.0:</strong><br>
                     <strong>Neu:</strong> Datum und Uhrzeit (Deadlines) für To-dos hinzufügen.<br>
                     <strong>Geplant:</strong> 29. August 2026
                 </li>
                 <li>
-                    <strong>Version 2.10.0:</strong><br>
+                    <strong>Version 2.9.0:</strong><br>
                     <strong>Neu:</strong> Wiederkehrende Aufgaben (z. B. täglich, wöchentlich, jeden Monat am 1.).<br>
                     <strong>Geplant:</strong> 30. August 2026
                 </li>
                 <li>
-                    <strong>Version 2.11.0:</strong><br>
+                    <strong>Version 2.10.0:</strong><br>
                     <strong>Neu:</strong> Push-Benachrichtigungen / Erinnerungen im Browser und auf dem Handy vor Ablauf einer Deadline.<br>
                     <strong>Geplant:</strong> 31. August 2026
                 </li>
                 <li>
-                    <strong>Version 2.12.0:</strong><br>
+                    <strong>Version 2.11.0:</strong><br>
                     <strong>Neu:</strong> To-dos per Drag & Drop manuell sortieren<br>
                     <strong>Geplant:</strong> Anfang September 2026
                 </li>
                 <li>
-                    <strong>Version 2.13.0:</strong><br>
+                    <strong>Version 2.12.0:</strong><br>
                     <strong>Neu:</strong> „Heute“- und „Demnächst“-Schnittstellen (Smarte Listen, die automatisch alle Aufgaben anzeigen, die heute oder in den nächsten 7 Tagen fällig sind).<br>
                     <strong>Geplant:</strong> Anfang September 2026
                 </li>
@@ -256,12 +264,16 @@
                     <strong>Version 2.3.0:</strong><br>
                     <strong>Neu:</strong> Mehrere To-do-Listen mit eigenen To-dos, Untertiteln, Bearbeitung und Löschen.<br>
                 </li>
+                <li>
+                    <strong>Version 2.5.0:</strong><br>
+                    <strong>Neu:</strong> Suchleiste, um To-dos schnell über alle Listen hinweg zu finden.<br>
+                </li>
             </ul>
             <button onclick="closeChangelog()" type="button">Schließen</button>
         </div>
 
         <div class="version-container">
-            <p class="version">Version 2.3.0</p>
+            <p class="version">Version 2.4.0</p>
         </div>
     </main>
 
