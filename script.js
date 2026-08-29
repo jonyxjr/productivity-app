@@ -1506,11 +1506,10 @@ function renderSearchHistory() {
         selectButton.className = "search__history-select";
         selectButton.textContent = entry;
         selectButton.addEventListener("click", () => {
-            searchField.value = entry;
-            addSearchHistory(entry);
-            renderSearchPanel();
-            searchField.focus();
-        });
+        searchField.value = entry;
+        searchField.dispatchEvent(new Event("input", { bubbles: true }));
+        searchField.focus();
+    });
         const removeButton = document.createElement("button");
         removeButton.type = "button";
         removeButton.className = "search__remove-history";
