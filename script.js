@@ -21,6 +21,7 @@ const APP_SETTINGS_KEY = "todoAppSettings";
 const PROFILE_ACTIVE_KEY = "todoAppProfileCategory";
 const PROFILE_FEEDBACK_KEY = "todoAppFeedback";
 const LAST_SYNC_KEY = "todoAppLastSync";
+const SEARCH_HISTORY_KEY = "todoAppSearchHistory";
 const DELETED_TODO_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 
 const authShell = document.getElementById("authShell");
@@ -39,6 +40,11 @@ const showLoginPanel = document.getElementById("showLoginPanel");
 const guestButtons = document.querySelectorAll(".guest-button");
 const todoField = document.getElementById("todoField");
 const addTodoButton = document.getElementById("btn-add-todo");
+const search = document.getElementById("search");
+const searchField = document.getElementById("searchField");
+const searchPanel = document.getElementById("searchPanel");
+const searchToggle = document.getElementById("searchToggle");
+const closeMobileSearchButton = document.getElementById("closeMobileSearch");
 const todoList = document.getElementById("todoList");
 const completedList = document.getElementById("completedList");
 const editTodoBackdrop = document.getElementById("editTodoBackdrop");
@@ -92,6 +98,7 @@ let currentUserEmail = "";
 let profileState = loadProfileSettings();
 let currentProfileCategory = localStorage.getItem(PROFILE_ACTIVE_KEY) || "konto";
 let isMobileProfileDetailOpen = false;
+let searchHistory = loadSearchHistory();
 
 const profileSections = {
     konto: {
@@ -134,7 +141,7 @@ const profileSections = {
         title: "Über",
         description: "Version, Changelog, Feedback und Hilfe.",
         items: [
-            { label: "App-Version", type: "meta", value: "Version 2.3.0" },
+            { label: "App-Version", type: "meta", value: "Version 2.4.0" },
             { label: "Changelog", type: "changelog" },
             { label: "Feedback senden", type: "button", action: "feedback" },
             { label: "Hilfe", type: "button", action: "help" }
@@ -200,6 +207,14 @@ function wireEvents() {
     registerForm.addEventListener("submit", handleRegister);
     guestButtons.forEach((button) => button.addEventListener("click", startGuestMode));
     addTodoButton.addEventListener("click", addTodo);
+    searchField.addEventListener("input", () => {
+        const query = searchField.value.trim();
+        if (query) addSearchHistory(query);
+        renderSearchPanel();
+    });
+    searchField.addEventListener("focus", renderSearchPanel);
+    searchToggle.addEventListener("click", openMobileSearch);
+    closeMobileSearchButton.addEventListener("click", closeMobileSearch);
     editTodoBackdrop.addEventListener("click", closeEditTodoDialog);
     cancelEditTodo.addEventListener("click", closeEditTodoDialog);
     saveEditTodo.addEventListener("click", saveEditedTodo);
@@ -270,6 +285,9 @@ function wireEvents() {
         if (!event.target.closest(".todo-actions")) {
             closeTodoActionMenus();
         }
+        if (!event.target.closest(".search, .search-toggle")) {
+            closeSearchPanel();
+        }
     });
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && profilePanel.classList.contains("is-open")) {
@@ -282,6 +300,8 @@ function wireEvents() {
         if (event.key === "Escape") {
             closeListDialog();
             closeListPickerDialog();
+            closeSearchPanel();
+            closeMobileSearch();
         }
     });
 
@@ -1289,6 +1309,7 @@ function renderTodos() {
 
     todos.forEach((todo, index) => {
         const todoItem = document.createElement("li");
+        todoItem.dataset.todoIndex = String(index);
         const checkbox = document.createElement("input");
         const text = document.createElement("span");
         const actions = document.createElement("div");
@@ -1360,6 +1381,199 @@ function renderTodos() {
         } else {
             todoList.appendChild(todoItem);
         }
+    });
+}
+
+function loadSearchHistory() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY) || "[]");
+        return Array.isArray(saved)
+            ? saved.filter((entry) => typeof entry === "string" && entry.trim()).slice(0, 5)
+            : [];
+    } catch {
+        return [];
+    }
+}
+
+function addSearchHistory(query) {
+    const term = query.trim();
+    if (!term) return;
+    const normalizedTerm = normalizeSearchTerm(term);
+    searchHistory = [term, ...searchHistory.filter((entry) => normalizeSearchTerm(entry) !== normalizedTerm)].slice(0, 5);
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(searchHistory));
+}
+
+function removeSearchHistory(query) {
+    const normalizedTerm = normalizeSearchTerm(query);
+    searchHistory = searchHistory.filter((entry) => normalizeSearchTerm(entry) !== normalizedTerm);
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(searchHistory));
+    renderSearchPanel();
+}
+
+function normalizeSearchTerm(value) {
+    return String(value).trim().toLocaleLowerCase("de-DE").replace(/\s+/g, "");
+}
+
+function closeSearchPanel() {
+    searchPanel.hidden = true;
+    searchField.setAttribute("aria-expanded", "false");
+}
+
+function openMobileSearch() {
+    if (!isPhoneLayout()) {
+        searchField.focus();
+        return;
+    }
+
+    app.classList.add("is-mobile-search-open");
+    search.classList.add("is-mobile-open");
+    searchToggle.setAttribute("aria-expanded", "true");
+    requestAnimationFrame(() => {
+        searchField.focus();
+        renderSearchPanel();
+    });
+}
+
+function closeMobileSearch() {
+    if (!search.classList.contains("is-mobile-open")) return;
+    app.classList.remove("is-mobile-search-open");
+    search.classList.remove("is-mobile-open");
+    searchToggle.setAttribute("aria-expanded", "false");
+    closeSearchPanel();
+}
+
+function renderSearchPanel() {
+    const query = searchField.value.trim();
+    searchPanel.innerHTML = "";
+    searchPanel.hidden = false;
+    searchField.setAttribute("aria-expanded", "true");
+
+    if (!query) {
+        renderSearchHistory();
+        return;
+    }
+
+    const normalizedQuery = normalizeSearchTerm(query);
+    const results = [];
+
+    lists.forEach((list) => {
+        if (normalizeSearchTerm(list.name).includes(normalizedQuery) || normalizeSearchTerm(list.subtitle).includes(normalizedQuery)) {
+            results.push({ type: "list", list });
+        }
+    });
+
+    lists.forEach((list) => {
+        list.todos.forEach((todo, todoIndex) => {
+            if (normalizeSearchTerm(todo.text).includes(normalizedQuery)) {
+                results.push({ type: "todo", list, todo, todoIndex });
+            }
+        });
+    });
+
+    if (!results.length) {
+        const empty = document.createElement("p");
+        empty.className = "search__empty";
+        empty.textContent = "Keine passenden To-dos oder Listen gefunden.";
+        searchPanel.appendChild(empty);
+        return;
+    }
+
+    results.forEach((result) => renderSearchResult(result));
+}
+
+function renderSearchHistory() {
+    const heading = document.createElement("p");
+    heading.className = "search__heading";
+    heading.textContent = "Letzte Suchen";
+    searchPanel.appendChild(heading);
+
+    if (!searchHistory.length) {
+        const empty = document.createElement("p");
+        empty.className = "search__empty";
+        empty.textContent = "Noch keine Suchanfragen.";
+        searchPanel.appendChild(empty);
+        return;
+    }
+
+    searchHistory.forEach((entry) => {
+        const row = document.createElement("div");
+        row.className = "search__history-item";
+        const icon = document.createElement("span");
+        icon.className = "search__result-icon";
+        icon.textContent = "⌕";
+        const selectButton = document.createElement("button");
+        selectButton.type = "button";
+        selectButton.className = "search__history-select";
+        selectButton.textContent = entry;
+        selectButton.addEventListener("click", () => {
+            searchField.value = entry;
+            addSearchHistory(entry);
+            renderSearchPanel();
+            searchField.focus();
+        });
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "search__remove-history";
+        removeButton.textContent = "×";
+        removeButton.setAttribute("aria-label", `Suchanfrage ${entry} entfernen`);
+        removeButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            removeSearchHistory(entry);
+            searchField.focus({ preventScroll: true });
+        });
+        row.append(icon, selectButton, removeButton);
+        searchPanel.appendChild(row);
+    });
+}
+
+function renderSearchResult(result) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "search__result";
+    const icon = document.createElement("span");
+    const copy = document.createElement("span");
+    const title = document.createElement("strong");
+    const subtitle = document.createElement("span");
+    copy.className = "search__result-copy";
+
+    if (result.type === "list") {
+        icon.className = "search__result-icon search__result-icon--list";
+        icon.textContent = "▤";
+        title.textContent = result.list.name;
+        subtitle.textContent = result.list.subtitle || "To-do-Liste";
+        button.addEventListener("click", () => {
+            selectList(result.list.id);
+            clearSearch();
+        });
+    } else {
+        icon.className = `search__result-icon${result.todo.done ? " search__result-icon--done" : ""}`;
+        icon.textContent = result.todo.done ? "✓" : "";
+        title.textContent = result.todo.text;
+        subtitle.textContent = result.list.name;
+        button.addEventListener("click", () => openSearchTodo(result.list.id, result.todoIndex));
+    }
+
+    copy.append(title, subtitle);
+    button.append(icon, copy);
+    searchPanel.appendChild(button);
+}
+
+function clearSearch() {
+    searchField.value = "";
+    closeSearchPanel();
+}
+
+function openSearchTodo(listId, todoIndex) {
+    selectList(listId);
+    clearSearch();
+    requestAnimationFrame(() => {
+        const todoItem = document.querySelector(`[data-todo-index="${todoIndex}"]`);
+        if (!todoItem) return;
+        todoItem.classList.remove("todo-highlight");
+        void todoItem.offsetWidth;
+        todoItem.classList.add("todo-highlight");
+        todoItem.scrollIntoView({ behavior: "smooth", block: "center" });
     });
 }
 
